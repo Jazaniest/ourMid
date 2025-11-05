@@ -1,0 +1,27 @@
+{
+  "users": [
+    {
+      "id": 1,
+      "telegramId": 8090024397,
+      "name": "SanzJzx",
+      "balance": 99000000,
+      "lastUpdated": "2025-07-27T12:10:28.084Z"
+    },
+    {
+      "id": 2,
+      "telegramId": 8077737794,
+      "name": "Lqxcy",
+      "balance": 0,
+      "lastUpdated": null
+    },
+    {
+      "id": 3,
+      "telegramId": 5738176287,
+      "name": "urflow44",
+      "balance": 0,
+      "lastUpdated": null
+    }
+  ],
+  "requests": [],
+  "transactions": []
+}

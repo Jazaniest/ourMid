@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Panel</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 text-gray-800">
+  <div class="container mx-auto p-6">
+    <h1 class="text-3xl font-semibold mb-6 text-center">Admin Panel</h1>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <!-- Users Table -->
+      <div class="bg-white shadow rounded-lg p-4">
+        <h2 class="text-xl font-medium mb-4">Users</h2>
+        <div class="overflow-auto">
+          <table class="w-full table-auto">
+            <thead>
+              <tr class="bg-gray-200">
+                <th class="px-4 py-2 text-left">ID</th>
+                <th class="px-4 py-2 text-left">Name</th>
+                <th class="px-4 py-2 text-left">Balance</th>
+              </tr>
+            </thead>
+            <tbody id="users" class="divide-y">
+              <!-- Users will be injected here -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <!-- Pending Requests -->
+      <div class="container mx-auto p-6 bg-white shadow rounded-lg">
+        <h2 class="text-xl font-medium mb-4">Broadcast to All Users</h2>
+        <textarea id="broadcastMsg" rows="4" class="w-full p-2 border rounded mb-4"
+          placeholder="Type your message here..."></textarea>
+        <button id="sendBroadcast" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded">
+          Send Broadcast
+        </button>
+      </div>
+    </div>
+  </div>
+  
+
+  <script>
+    async function fetchUsers() {
+      const res = await fetch('/api/admin/users');
+      const users = await res.json();
+      const rows = users.map(u =>
+        `<tr class="hover:bg-gray-50">
+          <td class="px-4 py-2">${u.id}</td>
+          <td class="px-4 py-2">${u.name}</td>
+          <td class="px-4 py-2">${u.balance}</td>
+        </tr>`
+      ).join('');
+      document.getElementById('users').innerHTML = rows;
+    }
+    async function fetchRequests() {
+      const res = await fetch('/api/admin/requests');
+      const reqs = await res.json();
+      const rows = reqs.map(r =>
+        `<tr class="hover:bg-gray-50">
+          <td class="px-4 py-2">${r.id}</td>
+          <td class="px-4 py-2">${r.userId}</td>
+          <td class="px-4 py-2">${r.amount}</td>
+          <td class="px-4 py-2">
+            <button class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded" onclick="approve(${r.id})">Approve</button>
+          </td>
+        </tr>`
+      ).join('');
+      document.getElementById('requests').innerHTML = rows;
+    }
+    async function approve(id) {
+      await fetch(`/api/admin/approve/${id}`, { method: 'POST' });
+      fetchRequests(); fetchUsers();
+    }
+    window.onload = () => { fetchUsers(); fetchRequests(); };
+
+    document.getElementById('sendBroadcast').addEventListener('click', async () => {
+      const msg = document.getElementById('broadcastMsg').value.trim();
+      if (!msg) return alert('Please enter a message.');
+      const res = await fetch('/api/admin/broadcast', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: msg })
+      });
+      const json = await res.json();
+      if (json.success) {
+        alert(`Broadcast sent to ${json.sent} users.`);
+        document.getElementById('broadcastMsg').value = '';
+      } else {
+        alert(`Error: ${json.error}`);
+      }
+    });
+  </script>
+</body>
+</html>
